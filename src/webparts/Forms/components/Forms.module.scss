@@ -1,0 +1,131 @@
+@import '~office-ui-fabric-react/dist/sass/References.scss';
+
+.Forms {
+  background-color: #fff;
+  h2{
+    font-weight: 600;
+    // margin-bottom: -15px;
+    // padding-top: 15px;
+    margin-bottom: 15px;
+    margin-top: 0;
+  }
+  .filterForm{
+    margin-bottom: 40px;
+    width: 98%;
+    input{
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      &::placeholder{
+        font-weight: normal;
+        font-size: 14px;
+      }
+    }
+    .resetSrchBtn{
+      float: right;
+      &::after{
+        content: " ";
+        clear: both;
+      }
+    }
+  }
+  .defautlLink{
+    color: #0173c6;
+    font-size: 14px;
+    text-decoration: none;
+    &:hover{
+      text-decoration: underline;
+    }
+  }
+  div[id^=GroupedListSection] div[class^=ms-GroupHeader] {
+    margin-left: 35px;
+  }
+  div[id^=GroupedListSection] div[class^=ms-GroupHeader-title] {
+    margin-left: 0;
+  }
+
+  .formStatusCol{
+    display: flex;
+    align-content: stretch;
+    align-items: center;
+    span{
+      margin-left: 5px;
+    }
+  }
+
+  .srchBox{
+    i{
+      color: #323130;
+    }
+  }
+  .comboCntnr{
+    display: flex!important;
+    flex-direction: row;
+    align-items: baseline;
+    .comboIcon{
+      border-bottom: 1px solid #605e5c;
+      height: 23px;
+      border-radius: 0;
+      padding-left: 17px;
+    }
+    .comboStyle{
+      width: 100%;
+      div{
+        &::after{
+          border: none;
+          border-bottom: 1px solid #605e5c;
+          border-radius: 0;
+        }
+      }
+    }
+  }
+
+  .fieldsAndHelp{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    border-radius: 4px;
+    padding: 5px 30px 5px 13px;
+    box-shadow: 0px 1px 5px 2px #ddd;
+    .fieldsSection{
+      display: block;
+      width: 85%;
+    }
+    .helpSection{
+      display: block;
+      background: #cfecff;
+      border-radius: 100%;
+      box-shadow: 0px 0px 5px 0px #ddd;
+      a{
+        display: block;
+      }
+      i{
+        font-size: 120px;
+        color: #087ec9;
+      }
+    }
+  }
+
+  .helpMsg{
+    margin-bottom: 20px;
+  }
+
+  .listViewNoWrap{
+    div[class^=ms-DetailsRow-cell]{
+      white-space: normal;
+    }
+  }
+}
+
+
+  
+.formStatusCol{
+  display: flex;
+  align-content: stretch;
+  align-items: center;
+  span{
+    margin-left: 10px;
+  }
+}
+
