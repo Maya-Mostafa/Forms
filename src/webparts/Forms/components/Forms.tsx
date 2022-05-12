@@ -18,7 +18,7 @@ export default function MyTasks (props: IFormsProps){
 
   const popToast = (toastMsg: string) =>{
     toast.success(toastMsg, {
-      duration: 2000,
+      duration: 3000,
 	  position: 'bottom-center',
       style: {
         margin: '20px',
