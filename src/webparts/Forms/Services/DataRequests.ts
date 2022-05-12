@@ -1,11 +1,10 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
-import {SPHttpClient} from "@microsoft/sp-http";
+import {SPHttpClient, ISPHttpClientOptions} from "@microsoft/sp-http";
 
-const getListItems = async (context: WebPartContext, listUrl: string, listName: string, listDisplayName: string, pageSize: number) =>{
+const getListItems = async (context: WebPartContext, listUrl: string, listName: string, listDisplayName: string, pageSize: number, followedDocs) =>{
   
   const listData: any = [];
   const responseUrl = `${listUrl}/_api/web/Lists/GetByTitle('${listDisplayName}')/items?$top=${pageSize}&$select=id,Title,Created,DeptSubDeptGroupings,DeptSubDeptGroupings,FieldValuesAsText/FileRef&$expand=FieldValuesAsText`;
-  
   
   try{
     const response = await context.spHttpClient.get(responseUrl, SPHttpClient.configurations.v1); //.then(r => r.json());
@@ -22,12 +21,15 @@ const getListItems = async (context: WebPartContext, listUrl: string, listName: 
             fileType: item.FieldValuesAsText.FileRef.substring(item.FieldValuesAsText.FileRef.lastIndexOf('.')+1),
             deptGrp: item.DeptSubDeptGroupings ? item.DeptSubDeptGroupings.substring(0, item.DeptSubDeptGroupings.indexOf('|')) : "",
             subDeptGrp: item.DeptSubDeptGroupings ? item.DeptSubDeptGroupings.substring(item.DeptSubDeptGroupings.indexOf('|')+1) : "",
-            depts: item.DeptSubDeptGroupings || "",
+            depts: item.DeptSubDeptGroupings ? item.DeptSubDeptGroupings : "",
             listUrl: listUrl,
             listName: listName,
             listDisplayName: listDisplayName,
             created: item.Created,
-            details: ""
+            details: "",
+            webUrl: item.FieldValuesAsText['@odata.id'] ? item.FieldValuesAsText['@odata.id'].substring(item.FieldValuesAsText['@odata.id'].indexOf('.com')+5, item.FieldValuesAsText['@odata.id'].indexOf('/_api')) : "",
+            listId: item['@odata.editLink'] ? item['@odata.editLink'].substring(item['@odata.editLink'].indexOf('guid')+5, item['@odata.editLink'].indexOf(')/Items')-1) : "",
+            isFollowing: item.FieldValuesAsText.FileRef ? ((followedDocs.filter(driveItem => driveItem.name === item.FieldValuesAsText.FileRef.substring(item.FieldValuesAsText.FileRef.lastIndexOf('/')+1))).length > 0 ? true : false) : ''
           });
         });
       }
@@ -40,14 +42,14 @@ const getListItems = async (context: WebPartContext, listUrl: string, listName: 
   }
   
   listData.sort((a,b) => a.name.localeCompare(b.name));
+  
   return listData;
 };
 
-export const readAllLists = async (context: WebPartContext, listUrl: string, listName: string, pageSize: number) =>{
+export const readAllLists = async (context: WebPartContext, listUrl: string, listName: string, pageSize: number, followedDocs: []) =>{
   const listData: any = [];
   let aggregatedListsPromises : any = [];
   const responseUrl = `${listUrl}/_api/web/Lists/GetByTitle('${listName}')/items`;
-
 
   try{
     const response = await context.spHttpClient.get(responseUrl, SPHttpClient.configurations.v1);
@@ -64,7 +66,7 @@ export const readAllLists = async (context: WebPartContext, listUrl: string, lis
       });
 
       listData.map((listItem: any)=>{
-        aggregatedListsPromises = aggregatedListsPromises.concat(getListItems(context, listItem.listUrl, listItem.listName, listItem.listDisplayName, pageSize));
+        aggregatedListsPromises = aggregatedListsPromises.concat(getListItems(context, listItem.listUrl, listItem.listName, listItem.listDisplayName, pageSize, followedDocs));
       });
 
     }else{
@@ -78,6 +80,57 @@ export const readAllLists = async (context: WebPartContext, listUrl: string, lis
   return Promise.all(aggregatedListsPromises);
 };
 
+export const getFollowed = async (context: WebPartContext) => {
+  const graphResponse = await context.msGraphClientFactory.getClient();
+  const followedDocsResponse = await graphResponse.api(`/me/drive/following`).get();
+  return followedDocsResponse;
+};
+
+const getDocDriveInfo = async (context: WebPartContext, listId: string, listItemId: string, webUrl: string) => {
+
+  /** Steps
+   * ok 1- listId -> get from list item
+   * ok 2- listItemId -> get from list item
+   * ok 3- siteUrl -> get from list item
+   * ok 4- hostName -> pdsb1.sharepoint.com
+   * ok 5- siteId -> 4529b386-b371-4b68-a258-23483541112b
+   * 6- webId -> get from graph api 1st call -> https://graph.microsoft.com/v1.0/sites/<hostName>:/<webUrl>
+   * 7- driveId & driveItemId-> get from graph api 2nd call -> https://graph.microsoft.com/v1.0/sites/<siteId,webId>/lists/<listId>/items/14/driveItem
+   */
+
+  const hostName = 'pdsb1.sharepoint.com';
+
+  const graphResponse = await context.msGraphClientFactory.getClient();
+
+  const webIdResponse = await graphResponse.api(`/sites/${hostName}:/${webUrl}`).get();
+  const completeSiteId = webIdResponse.id;
+  const siteId = completeSiteId.substring(completeSiteId.indexOf(',')+1, completeSiteId.lastIndexOf(','));
+  const webId = completeSiteId.substring(completeSiteId.lastIndexOf(',')+1);
+
+  const driveResponse = await graphResponse.api(`/sites/${siteId},${webId}/lists/${listId}/items/${listItemId}/driveItem`).get();
+
+  return [driveResponse.parentReference.driveId, driveResponse.id];
+};
+
+export const unFollowDocument = async (context: WebPartContext, listId: string, listItemId: string, webUrl: string) => {
+  const [driveId, driveItemId] =  await getDocDriveInfo(context, listId, listItemId, webUrl);
+
+  const graphResponse = await context.msGraphClientFactory.getClient();
+  const unfollowResponse = await graphResponse.api(`/drives/${driveId}/items/${driveItemId}/unfollow`).post(JSON.stringify(''));
+
+  console.log("unfollowResponse", unfollowResponse);
+};
+
+export const followDocument = async (context: WebPartContext, listId: string, listItemId: string, webUrl: string) => {
+
+  const [driveId, driveItemId] =  await getDocDriveInfo(context, listId, listItemId, webUrl);
+
+  const graphResponse = await context.msGraphClientFactory.getClient();
+  const followResponse = await graphResponse.api(`/drives/${driveId}/items/${driveItemId}/follow`).post(JSON.stringify(''));
+
+  console.log("followResponse", followResponse);
+};
+
 export const isObjectEmpty = (items: any): boolean=>{
   let isEmpty:boolean = true;
   for (const item in items){
@@ -86,14 +139,14 @@ export const isObjectEmpty = (items: any): boolean=>{
   return isEmpty;
 };
 
-
 export const arrayUnique = (arr, uniqueKey) => {
   const flagList = [];
-  return arr.filter(function(item) {
+  return arr.filter((item) => {
     if (flagList.indexOf(item[uniqueKey]) === -1) {
       flagList.push(item[uniqueKey]);
       return true;
     }
   });
 };
+
 

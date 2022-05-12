@@ -1,5 +1,9 @@
 export interface IListItemsProps{
     items: any;
     filterField: any;
-    preloaderVisible: boolean;    
+    preloaderVisible: boolean;  
+    
+    unFollowDocument: any;
+    followDocument: any;
+    isFollowPreloaderVisible: boolean;
 }

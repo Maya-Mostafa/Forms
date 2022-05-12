@@ -1,12 +1,11 @@
 import * as React from 'react';
 import {IListItemsProps} from './IListItemsProps';
 import styles from '../Forms.module.scss';
-import {MessageBar, MessageBarType, Spinner} from '@fluentui/react';
+import {MessageBar, MessageBarType, Spinner, IconButton} from '@fluentui/react';
 import { ListView, IViewField, GroupOrder, IGrouping } from "@pnp/spfx-controls-react/lib/ListView";
 import { TooltipHost, Icon } from '@fluentui/react';
 import { initializeFileTypeIcons } from '@uifabric/file-type-icons';
 import { getFileTypeIconProps } from '@uifabric/file-type-icons';
-
 // Register icons and pull the fonts from the default SharePoint cdn.
 initializeFileTypeIcons();
 
@@ -24,8 +23,24 @@ export interface IDocument {
   }
 
 export default function IListItems (props: IListItemsProps) {
-  
+
   const viewFields:IViewField [] = [
+    {
+      name: '',
+      displayName: '',
+      minWidth: 16,
+      maxWidth: 16,
+      render: (item: any) => (
+        <div className={styles.favIconBtns}>
+          {item.isFollowing 
+            ? 
+            <IconButton title='Unfavorite' onClick={() => props.unFollowDocument(item)} iconProps={{iconName : 'FavoriteStarFill'}} />
+            :
+            <IconButton title='Favorite' onClick={() => props.followDocument(item)} iconProps={{iconName : 'FavoriteStar'}} />  
+          }
+        </div>
+      ),
+    },
     {
         name: '',
         displayName: '',
@@ -45,7 +60,7 @@ export default function IListItems (props: IListItemsProps) {
         sorting: true,
         isResizable: true,
         render : (item: any) => (
-        <div>
+        <div>            
             <a className={styles.defautlLink} target="_blank" data-interception="off" href={item.link}>{item.name}</a>
         </div>
         )
@@ -75,6 +90,11 @@ export default function IListItems (props: IListItemsProps) {
 
   return(
     <div className={styles.listViewNoWrap}>
+        {props.isFollowPreloaderVisible &&
+          <div className={styles.preloaderOverlay}>
+            <Spinner className={styles.spinner} label="Updating your favorites, please wait..." ariaLive="assertive" labelPosition="right" />
+          </div>
+        }
         <ListView
             items={filteredItems}
             viewFields={viewFields}
