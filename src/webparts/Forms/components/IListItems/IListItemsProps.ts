@@ -5,5 +5,4 @@ export interface IListItemsProps{
     
     unFollowDocument: any;
     followDocument: any;
-    isFollowPreloaderVisible: boolean;
 }

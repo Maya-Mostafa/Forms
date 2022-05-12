@@ -5,23 +5,34 @@ import { IFormsProps } from './IFormsProps';
 import {readAllLists, getFollowed, unFollowDocument, followDocument} from  '../Services/DataRequests';
 import IListItems from './IListItems/IListItems';
 import IFilterFields from './IFilterFields/IFilterFields';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function MyTasks (props: IFormsProps){
 
   const [listItems, setListItems] = React.useState([]);
   const [preloaderVisible, setPreloaderVisible] = React.useState(true);
-  const [isFollowPreloaderVisible, setFollowPreloaderVisible] = React.useState(false);
   const [filterFields, setFilterFields] = React.useState({
     name: "",
     depts: ""
   });
+
+  const popToast = (toastMsg: string) =>{
+    toast.success(toastMsg, {
+      duration: 2000,
+	  position: 'bottom-center',
+      style: {
+        margin: '20px',
+		backgroundColor: '#616161',
+		color: '#ffffff'
+      },
+    });
+  };
 
   const fetchLists = () => {
 	getFollowed(props.context).then(followedDocs => {
 		readAllLists(props.context, props.listUrl, props.listName, props.pageSize, followedDocs.value).then((r: any) =>{
 			setListItems(r.flat());
 			setPreloaderVisible(false);
-			setFollowPreloaderVisible(false);
 		});
 	});
   };
@@ -61,9 +72,8 @@ export default function MyTasks (props: IFormsProps){
 //   };
 
   const followDocumentHandler = (item) => {
-	// setFollowPreloaderVisible(true);
     followDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
-		
+		popToast('Added to Favorites!');
     });
 	setListItems(prevState => {
 		return prevState.map(prevItem => {
@@ -73,12 +83,10 @@ export default function MyTasks (props: IFormsProps){
 			return {...updatedItem};
 		});
 	});
-	// setFollowPreloaderVisible(false);
   };
   const unFollowDocumentHandler = (item) => {
-	// setFollowPreloaderVisible(true);
     unFollowDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
-    
+		popToast('Removed from Favorites!');
 	});
 	setListItems(prevState => {
 		return prevState.map(prevItem => {
@@ -88,11 +96,12 @@ export default function MyTasks (props: IFormsProps){
 			return {...updatedItem};
 		});
 	});
-	// setFollowPreloaderVisible(false);
   };
   
   return (
 		<div className={styles.Forms}>
+			<Toaster />
+
 			<h2>{props.wpTitle}</h2>
 
 			<div className={styles.fieldsAndHelp}>
@@ -134,7 +143,6 @@ export default function MyTasks (props: IFormsProps){
 				filterField={filterFields}
 				followDocument={followDocumentHandler}
 				unFollowDocument={unFollowDocumentHandler}
-				isFollowPreloaderVisible={isFollowPreloaderVisible}
 			/>
 		</div>
   );

@@ -90,11 +90,6 @@ export default function IListItems (props: IListItemsProps) {
 
   return(
     <div className={styles.listViewNoWrap}>
-        {props.isFollowPreloaderVisible &&
-          <div className={styles.preloaderOverlay}>
-            <Spinner className={styles.spinner} label="Updating your favorites, please wait..." ariaLive="assertive" labelPosition="right" />
-          </div>
-        }
         <ListView
             items={filteredItems}
             viewFields={viewFields}
