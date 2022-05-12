@@ -112,13 +112,19 @@
   }
 
   .listViewNoWrap{
+    position: relative;
     div[class^=ms-DetailsRow-cell]{
       white-space: normal;
     }
   }
 }
 
-
+.favIconBtns{
+  button span{
+    display: flex;
+    align-items: flex-start;
+  }
+}
   
 .formStatusCol{
   display: flex;
@@ -129,3 +135,16 @@
   }
 }
 
+.preloaderOverlay{
+  background: rgba(255, 255, 255, 0.5);
+  position: fixed;
+  left: 0;
+  top: 75px;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  .spinner{
+    display: block;
+  }
+}
