@@ -47,20 +47,50 @@ export default function MyTasks (props: IFormsProps){
   };
 
 
+//   const followDocumentHandler = (item) => {
+// 	setFollowPreloaderVisible(true);
+// 	followDocument(props.context, item.listId, item.id, item.webUrl).then(() => {
+// 		fetchLists();
+// 	});
+//   };
+//   const unFollowDocumentHandler = (item) => {
+// 	setFollowPreloaderVisible(true);
+// 	unFollowDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
+// 		fetchLists();
+// 	});
+//   };
+
   const followDocumentHandler = (item) => {
-	setFollowPreloaderVisible(true);
-	followDocument(props.context, item.listId, item.id, item.webUrl).then(() => {
-		fetchLists();
+	// setFollowPreloaderVisible(true);
+    followDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
+		
+    });
+	setListItems(prevState => {
+		return prevState.map(prevItem => {
+			const updatedItem = {...prevItem};
+			if (updatedItem.listId === item.listId && updatedItem.id === item.id)
+				updatedItem.isFollowing = true;
+			return {...updatedItem};
+		});
 	});
+	// setFollowPreloaderVisible(false);
   };
   const unFollowDocumentHandler = (item) => {
-	setFollowPreloaderVisible(true);
-	unFollowDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
-		fetchLists();
+	// setFollowPreloaderVisible(true);
+    unFollowDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
+    
 	});
+	setListItems(prevState => {
+		return prevState.map(prevItem => {
+			const updatedItem = {...prevItem};
+			if (updatedItem.listId === item.listId && updatedItem.id === item.id)
+				updatedItem.isFollowing = false;
+			return {...updatedItem};
+		});
+	});
+	// setFollowPreloaderVisible(false);
   };
-
-
+  
   return (
 		<div className={styles.Forms}>
 			<h2>{props.wpTitle}</h2>
