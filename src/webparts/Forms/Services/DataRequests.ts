@@ -1,7 +1,7 @@
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import {SPHttpClient, ISPHttpClientOptions} from "@microsoft/sp-http";
 
-const getListItems = async (context: WebPartContext, listUrl: string, listName: string, listDisplayName: string, pageSize: number, followedDocs) =>{
+const getListItems = async (context: WebPartContext, listUrl: string, listName: string, listDisplayName: string, pageSize: number, followedDocs: any) =>{
   
   const listData: any = [];
   const responseUrl = `${listUrl}/_api/web/Lists/GetByTitle('${listDisplayName}')/items?$top=${pageSize}&$select=id,Title,Created,DeptSubDeptGroupings,DeptSubDeptGroupings,FieldValuesAsText/FileRef&$expand=FieldValuesAsText`;
@@ -46,7 +46,7 @@ const getListItems = async (context: WebPartContext, listUrl: string, listName: 
   return listData;
 };
 
-export const readAllLists = async (context: WebPartContext, listUrl: string, listName: string, pageSize: number, followedDocs: []) =>{
+export const readAllLists = async (context: WebPartContext, listUrl: string, listName: string, pageSize: number, followedDocs: any) =>{
   const listData: any = [];
   let aggregatedListsPromises : any = [];
   const responseUrl = `${listUrl}/_api/web/Lists/GetByTitle('${listName}')/items`;
