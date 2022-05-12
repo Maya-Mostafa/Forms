@@ -16,16 +16,30 @@ export default function MyTasks (props: IFormsProps){
     depts: ""
   });
 
-  const popToast = (toastMsg: string) =>{
-    toast.success(toastMsg, {
-      duration: 3000,
-	  position: 'bottom-center',
-      style: {
-        margin: '20px',
-		backgroundColor: '#616161',
-		color: '#ffffff'
-      },
-    });
+  const popToast = (toastMsg) =>{
+    // toast.success(toastMsg, {
+    //   duration: 3000,
+	//   position: 'bottom-center',
+    //   style: {
+    //     margin: '20px',
+	// 	backgroundColor: '#616161',
+	// 	color: '#ffffff'
+    //   },
+    // });
+	toast.custom((t) => (
+		<div>
+			{t.message} <a href="https://www.office.com/mycontent">Favorites!</a>
+			<button onClick={() => toast.dismiss(t.id)}>x</button>
+		</div>
+	  ),{
+		  duration: 3000,
+		  position: 'bottom-center',
+		  style:{
+			  margin: '20px',
+			  backgroundColor: '#616161',
+			  color: '#ffffff'
+		  }
+	  });
   };
 
   const fetchLists = () => {
@@ -73,7 +87,13 @@ export default function MyTasks (props: IFormsProps){
 
   const followDocumentHandler = (item) => {
     followDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
-		popToast('Added to Favorites!');
+		//popToast('Added to ');
+		toast.custom((t) => (
+			<div className={styles.toastMsg}>
+				<Icon iconName='Accept' /> Added to <a target='_blank' href="https://www.office.com/mycontent">Favorites!</a>
+				{/* <button onClick={() => toast.dismiss(t.id)}>x</button> */}
+			</div>
+		));
     });
 	setListItems(prevState => {
 		return prevState.map(prevItem => {
@@ -86,7 +106,13 @@ export default function MyTasks (props: IFormsProps){
   };
   const unFollowDocumentHandler = (item) => {
     unFollowDocument(props.context, item.listId, item.id, item.webUrl).then(()=>{
-		popToast('Removed from Favorites!');
+		//popToast('Removed from ');
+		toast.custom((t) => (
+			<div className={styles.toastMsg}>
+				<Icon iconName='Accept' /> Removed from <a target='_blank' href="https://www.office.com/mycontent">Favorites!</a>
+				{/* <button onClick={() => toast.dismiss(t.id)}>x</button> */}
+			</div>
+		));
 	});
 	setListItems(prevState => {
 		return prevState.map(prevItem => {
@@ -100,7 +126,9 @@ export default function MyTasks (props: IFormsProps){
   
   return (
 		<div className={styles.Forms}>
-			<Toaster />
+			<Toaster position='bottom-center' toastOptions={{custom:{
+				duration: 3000
+			}}}/>
 
 			<h2>{props.wpTitle}</h2>
 
