@@ -302,3 +302,6 @@ https://www.techmikael.com/2021/01/microsoft-graph-encoding-and-decoding.html
 
 
 
+# Console.log() shortcut
+clg for console.log(object);
+clo for console.log('object :', object);
