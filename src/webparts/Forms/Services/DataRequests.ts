@@ -82,7 +82,8 @@ export const readAllLists = async (context: WebPartContext, listUrl: string, lis
 
 export const getFollowed = async (context: WebPartContext) => {
   const graphResponse = await context.msGraphClientFactory.getClient();
-  const followedDocsResponse = await graphResponse.api(`/me/drive/following`).get();
+  const followedDocsResponse = await graphResponse.api(`/me/drive/following`).top(1000).get();
+  console.log("My Followed documents", followedDocsResponse);
   return followedDocsResponse;
 };
 
@@ -109,6 +110,13 @@ const getDocDriveInfo = async (context: WebPartContext, listId: string, listItem
 
   const driveResponse = await graphResponse.api(`/sites/${siteId},${webId}/lists/${listId}/items/${listItemId}/driveItem`).get();
 
+  console.log("webUrl", webUrl);
+  console.log("completeSiteId", completeSiteId);
+  console.log("siteId", siteId);
+  console.log("webId", webId);
+  console.log("driveResponse", driveResponse);
+
+
   return [driveResponse.parentReference.driveId, driveResponse.id];
 };
 
@@ -124,6 +132,9 @@ export const unFollowDocument = async (context: WebPartContext, listId: string, 
 export const followDocument = async (context: WebPartContext, listId: string, listItemId: string, webUrl: string) => {
 
   const [driveId, driveItemId] =  await getDocDriveInfo(context, listId, listItemId, webUrl);
+
+  console.log("driveId", driveId);
+  console.log("driveItemId", driveItemId);
 
   const graphResponse = await context.msGraphClientFactory.getClient();
   const followResponse = await graphResponse.api(`/drives/${driveId}/items/${driveItemId}/follow`).post(JSON.stringify(''));
